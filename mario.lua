@@ -2,8 +2,15 @@ Mario = Classe:extend()
 
 
 function Mario:new()
+    self.sprites = {}
+    self.bucketSprite = love.graphics.newImage("barrel.png")
+    self.currentSprite = 0
+    for i = 0, 6 do
+        self.sprites[i] = love.graphics.newImage(i .. ".png")
+    end
     self.x, self.y = 30, 30
-    self.l, self.a = 10, 30
+    self.l, self.a = self.sprites[self.currentSprite]:getWidth() * 0.03,
+        self.sprites[self.currentSprite]:getHeight() * 0.03
     self.gravidade = 2
     self.vel_pulo = 5
     self.vel_y = 0
@@ -12,6 +19,8 @@ function Mario:new()
     self.tempo_pulo_max = 0
     self.esta_no_chao = false
     self.pulou_ultimo_frame = false
+    self.toRight = true
+    self.currentTimer = 0
 end
 
 function Mario:update(dt)
@@ -36,7 +45,7 @@ function Mario:update(dt)
     end
 
     --if self.tempo_pulo > self.tempo_pulo_max then
-    self.vel_y = self.vel_y + self.gravidade * 15 * dt
+    self.vel_y = self.vel_y + self.gravidade * 0.1
     --end
     self.y = self.y + self.vel_y
 
@@ -45,7 +54,15 @@ function Mario:update(dt)
 end
 
 function Mario:draw()
-    love.graphics.rectangle("fill", self.x, self.y, self.l, self.a)
+    if self.toRight then
+        love.graphics.draw(self.sprites[self.currentSprite], self.x + self.l, self.y, 0, -0.03, 0.03)
+        love.graphics.draw(self.bucketSprite, self.x - 5,
+            self.y - self.bucketSprite:getHeight())
+    else
+        love.graphics.draw(self.sprites[self.currentSprite], self.x, self.y, 0, 0.03, 0.03)
+        love.graphics.draw(self.bucketSprite, self.x + 5,
+            self.y - self.bucketSprite:getHeight())
+    end
 end
 
 function Mario:ficaNoChao(posicao_y_chao)
@@ -56,10 +73,37 @@ function Mario:ficaNoChao(posicao_y_chao)
 end
 
 function Mario:andar(dt)
+    local changeInterval = 0.2
     if love.keyboard.isDown("a") then
+        self.currentTimer = self.currentTimer + dt
+
+        if self.currentTimer > changeInterval then
+            self.currentSprite = self.currentSprite + 1
+            if self.currentSprite > 6 then
+                self.currentSprite = 1
+            end
+            self.currentTimer = 0
+        end
+
+
+        self.toRight = true
+        self.l = math.abs(self.l)
         self.x = self.x - self.vel_andar * dt
     elseif love.keyboard.isDown("d") then
+        self.currentTimer = self.currentTimer + dt
+
+        if self.currentTimer > changeInterval then
+            self.currentSprite = self.currentSprite + 1
+            if self.currentSprite > 6 then
+                self.currentSprite = 1
+            end
+            self.currentTimer = 0
+        end
+        self.toRight = false
+        self.l = self.l
         self.x = self.x + self.vel_andar * dt
+    else
+        self.currentSprite = 0
     end
 end
 

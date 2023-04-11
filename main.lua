@@ -2,6 +2,7 @@ Classe = require "classic"
 require "jogo"
 require "cenario"
 require "mario"
+require "nuvem"
 
 
 function love.load()
